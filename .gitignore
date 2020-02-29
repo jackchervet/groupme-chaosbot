@@ -11,5 +11,6 @@ out/
 .project
 .settings
 .classpath
+AuthTokenSupplier.java
 BotIdSupplier.java
 deployment.yml
