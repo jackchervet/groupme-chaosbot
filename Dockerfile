@@ -1,4 +1,4 @@
 FROM adoptopenjdk/openjdk11-openj9:jdk-11.0.1.13-alpine-slim
-COPY build/libs/groupme-*-all.jar repositories.jar
+COPY build/libs/repositories-*-all.jar groupme.jar
 EXPOSE 8080
-CMD java -Dcom.sun.management.jmxremote -noverify ${JAVA_OPTS} -jar repositories.jar
+CMD java -Dcom.sun.management.jmxremote -noverify ${JAVA_OPTS} -jar groupme.jar

@@ -6,34 +6,28 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.inject.Inject;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.client.RxHttpClient;
-import io.micronaut.http.client.annotation.Client;
+import helpers.GroupMeClient;
+import models.BotPostModel;
 import models.GroupModel;
 
 public class ApiGroupMeRepository implements GroupMeRepository {
-    private static final String BASE_API_URL = "https://api.groupme.com/v3";
-    private static final String GROUPS_ENDPOINT = "/groups";
-    private static final String REMOVE_USER_ENDPOINT = "/groups/%s/members/%s/remove";
     private final Supplier<String> authTokenSupplier;
+    private final GroupMeClient httpClient;
 
-    @Client(BASE_API_URL)
-    @Inject RxHttpClient httpClient;
-    public ApiGroupMeRepository(Supplier<String> authTokenSupplier) {
+    public ApiGroupMeRepository(Supplier<String> authTokenSupplier, GroupMeClient client) {
         this.authTokenSupplier = authTokenSupplier;
+        this.httpClient = client;
     }
 
     @Override
     public List<GroupModel> listGroups() {
         Gson gson = new Gson();
         JsonObject response = gson.fromJson(
-            httpClient.toBlocking().retrieve(GROUPS_ENDPOINT), JsonObject.class);
+            httpClient.getGroups(), JsonObject.class);
         JsonArray allGroups = response.get("response").getAsJsonArray();
 
         return IntStream.range(0, allGroups.size())
@@ -46,7 +40,7 @@ public class ApiGroupMeRepository implements GroupMeRepository {
     public Optional<GroupModel> getGroupByGroupId(String groupId) {
         Gson gson = new Gson();
         JsonObject response = gson.fromJson(
-            httpClient.toBlocking().retrieve(GROUPS_ENDPOINT), JsonObject.class);
+            httpClient.getGroups(), JsonObject.class);
         JsonArray allGroups = response.get("response").getAsJsonArray();
 
         return IntStream.range(0, allGroups.size())
@@ -58,7 +52,16 @@ public class ApiGroupMeRepository implements GroupMeRepository {
 
     @Override
     public void removeUserFromGroup(String groupId, String membershipId) {
-        httpClient.exchange(
-            HttpRequest.POST(String.format(REMOVE_USER_ENDPOINT, groupId, membershipId), ""));
+        httpClient.removeMember(groupId, membershipId);
+    }
+
+    @Override
+    public void sendMessageToGroup(BotPostModel message) {
+        Gson gson = new Gson();
+        String m = gson.toJson(message);
+        System.out.println("message: " + m);
+        System.out.println("client: " + httpClient);
+
+        httpClient.postMessage(m);
     }
 }
