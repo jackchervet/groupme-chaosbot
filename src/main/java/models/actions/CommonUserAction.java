@@ -18,7 +18,7 @@ public class CommonUserAction implements UserAction {
         ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
         String text = sentMessage.getText().toLowerCase();
 
-        if (text.contains("new meme")) {
+        if (text.contains("new meme") && !"bot".equals(sentMessage.getSenderType())) {
             actionsList.add(MessageAction.newBuilder()
                 .setMessageText("new meme guys")
                 .setAttachment(new Attachment.Builder()
