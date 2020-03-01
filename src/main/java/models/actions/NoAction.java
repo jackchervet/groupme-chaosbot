@@ -1,8 +1,6 @@
 package models.actions;
 
-import java.util.Optional;
-
-import models.BotPostModel;
+import helpers.GroupMeClient;
 
 public class NoAction implements Action {
     @Override
@@ -11,7 +9,5 @@ public class NoAction implements Action {
     }
 
     @Override
-    public Optional<BotPostModel> messageToSend() {
-        return Optional.empty();
-    }
+    public void performAction(GroupMeClient client) {}
 }

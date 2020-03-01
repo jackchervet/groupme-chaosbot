@@ -1,5 +1,6 @@
 package chaosbot;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -12,11 +13,8 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import models.MessageCallbackModel;
 import models.actions.Action;
-import models.actions.ActionType;
-import models.actions.NoAction;
 import models.actions.UserAction;
 import models.actions.UserActionFactory;
-import repositories.GroupMeRepository;
 
 @Controller("/bot")
 public class BotController {
@@ -31,12 +29,8 @@ public class BotController {
         Optional<UserAction> userAction = UserActionFactory.getActionForUser(message.getSenderId());
 
         if (userAction.isPresent()) {
-            GroupMeRepository repo = GroupMeRepository.get(client);
-            Action action = userAction.get().action(message).orElse(new NoAction());
-
-            if (ActionType.MESSAGE.equals(action.type()) && action.messageToSend().isPresent()) {
-                repo.sendMessageToGroup(action.messageToSend().get());
-            }
+            List<Action> actions = userAction.get().action(message);
+            actions.forEach(a -> a.performAction(client));
         }
     }
 }

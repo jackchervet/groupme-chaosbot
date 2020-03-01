@@ -1,9 +1,9 @@
 package models.actions;
 
-import java.util.Optional;
+import java.util.List;
 
 import models.MessageCallbackModel;
 
 public interface UserAction {
-    Optional<Action> action(MessageCallbackModel sentMessage);
+    List<Action> action(MessageCallbackModel sentMessage);
 }

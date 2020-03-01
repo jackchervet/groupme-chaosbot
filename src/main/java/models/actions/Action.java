@@ -1,10 +1,8 @@
 package models.actions;
 
-import java.util.Optional;
-
-import models.BotPostModel;
+import helpers.GroupMeClient;
 
 public interface Action {
     ActionType type();
-    Optional<BotPostModel> messageToSend();
+    void performAction(GroupMeClient client);
 }

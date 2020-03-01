@@ -1,10 +1,10 @@
 package models.actions;
 
-import java.util.Optional;
-
 import helpers.BotIdSupplier;
+import helpers.GroupMeClient;
 import models.BotPostModel;
 import models.BotPostModel.Attachment;
+import repositories.GroupMeRepository;
 
 public class MessageAction implements Action {
     private String messageText;
@@ -21,13 +21,16 @@ public class MessageAction implements Action {
     }
 
     @Override
-    public Optional<BotPostModel> messageToSend() {
-        return Optional.of(
-            new BotPostModel.Builder()
-                .setBotId(BotIdSupplier.get().get())
-                .setText(this.messageText)
-                .addAttachment(this.attachment)
-            .build());
+    public void performAction(GroupMeClient client) {
+        GroupMeRepository repo = GroupMeRepository.get(client);
+
+        BotPostModel message = new BotPostModel.Builder()
+            .setBotId(BotIdSupplier.get().get())
+            .setText(this.messageText)
+            .addAttachment(this.attachment)
+        .build();
+
+        repo.sendMessageToGroup(message);
     }
 
     public static Builder newBuilder() {

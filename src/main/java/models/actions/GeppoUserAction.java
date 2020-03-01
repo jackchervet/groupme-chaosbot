@@ -1,5 +1,6 @@
 package models.actions;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -27,18 +28,19 @@ public class GeppoUserAction implements UserAction {
     }
 
     @Override
-    public Optional<Action> action(MessageCallbackModel sentMessage) {
-        Optional<Action> commonAction = CommonUserAction.checkActions(sentMessage);
-        if (commonAction.isPresent()) {
-            return commonAction;
-        }
+    public List<Action> action(MessageCallbackModel sentMessage) {
+        ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
 
-        return Optional.of(MessageAction.newBuilder()
+        actionsList.addAll(CommonUserAction.checkActions(sentMessage));
+
+        actionsList.add(MessageAction.newBuilder()
             .setAttachment(new BotPostModel.Attachment.Builder()
                 .setType("image")
                 .setUrl(getPepperImage())
                 .build())
             .build());
+
+        return actionsList.build();
     }
 
     private static String getPepperImage() {
