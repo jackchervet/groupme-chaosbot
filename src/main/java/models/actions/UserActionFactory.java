@@ -11,6 +11,6 @@ public class UserActionFactory {
             .build();
 
     public static Optional<UserAction> getActionForUser(String userId) {
-        return Optional.ofNullable(ID_TO_ACTION_MAP.get(userId));
+        return Optional.ofNullable(ID_TO_ACTION_MAP.getOrDefault(userId, new CommonUserAction()));
     }
 }
