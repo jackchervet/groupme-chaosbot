@@ -18,6 +18,8 @@ import models.actions.UserActionFactory;
 
 @Controller("/bot")
 public class BotController {
+    public static final ActionFlags FLAGS = new ActionFlags();
+
     @Inject
     private GroupMeClient client;
 

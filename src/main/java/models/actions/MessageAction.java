@@ -1,5 +1,7 @@
 package models.actions;
 
+import com.google.gson.Gson;
+
 import helpers.BotIdSupplier;
 import helpers.GroupMeClient;
 import models.BotPostModel;
@@ -30,7 +32,9 @@ public class MessageAction implements Action {
             .addAttachment(this.attachment)
         .build();
 
-        repo.sendMessageToGroup(message);
+        Gson gson = new Gson();
+        System.out.println(gson.toJson(message));
+//        repo.sendMessageToGroup(message);
     }
 
     public static Builder newBuilder() {
