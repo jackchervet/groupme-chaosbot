@@ -8,6 +8,7 @@ import java.util.Random;
 import com.google.common.collect.ImmutableList;
 
 import helpers.Users;
+import models.Attachment;
 import models.BotPostModel;
 import models.MessageCallbackModel;
 
@@ -30,14 +31,21 @@ public class GeppoUserAction implements UserAction {
     }
 
     @Override
-    public List<Action> action(MessageCallbackModel sentMessage) {
+    public List<Before> before(MessageCallbackModel sentMessage) {
+        ImmutableList.Builder<Before> befores = new ImmutableList.Builder<>();
+        befores.addAll(CommonUserAction.checkBefore(sentMessage));
+        return befores.build();
+    }
+
+    @Override
+    public List<Action> action(MessageCallbackModel sentMessage, List<BeforeResult> results) {
         ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
 
-        actionsList.addAll(CommonUserAction.checkActions(sentMessage));
+        actionsList.addAll(CommonUserAction.checkActions(sentMessage, results));
 
         if (FLAGS.peppersOn()) {
             actionsList.add(MessageAction.newBuilder()
-                .addAttachment(new BotPostModel.Attachment.Builder()
+                .addAttachment(new Attachment.Builder()
                     .setType("image")
                     .setUrl(getPepperImage())
                     .build())

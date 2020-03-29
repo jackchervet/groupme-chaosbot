@@ -13,10 +13,17 @@ public class GioUserAction implements UserAction {
     }
 
     @Override
-    public List<Action> action(MessageCallbackModel sentMessage) {
+    public List<Before> before(MessageCallbackModel sentMessage) {
+        ImmutableList.Builder<Before> befores = new ImmutableList.Builder<>();
+        befores.addAll(CommonUserAction.checkBefore(sentMessage));
+        return befores.build();
+    }
+
+    @Override
+    public List<Action> action(MessageCallbackModel sentMessage, List<BeforeResult> results) {
         ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
 
-        actionsList.addAll(CommonUserAction.checkActions(sentMessage));
+        actionsList.addAll(CommonUserAction.checkActions(sentMessage, results));
 
         String text = sentMessage.getText().toLowerCase();
 

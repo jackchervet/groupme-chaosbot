@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import helpers.GroupMeClient;
 import models.BotPostModel;
 import models.GroupModel;
+import models.MessageCallbackModel;
 
 public class ApiGroupMeRepository implements GroupMeRepository {
     private final Supplier<String> authTokenSupplier;
@@ -51,6 +52,12 @@ public class ApiGroupMeRepository implements GroupMeRepository {
     }
 
     @Override
+    public MessageCallbackModel getLikedMessagesForPeriod(String groupId, String period) {
+        String response = httpClient.getLikesForPeriod(groupId, period, authTokenSupplier.get());
+        return new Gson().fromJson(response, MessageCallbackModel.class);
+    }
+
+    @Override
     public void removeUserFromGroup(String groupId, String membershipId) {
         httpClient.removeMember(groupId, membershipId);
     }
@@ -60,8 +67,6 @@ public class ApiGroupMeRepository implements GroupMeRepository {
         Gson gson = new Gson();
         String m = gson.toJson(message);
         System.out.println("message: " + m);
-        System.out.println("client: " + httpClient);
-
         httpClient.postMessage(m);
     }
 }

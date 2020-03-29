@@ -1,14 +1,19 @@
 package models.actions;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import helpers.Users;
-import models.BotPostModel.Attachment;
+import models.Attachment;
+import models.LikedMessagesModel;
+import models.LikedMessagesModel.Message;
 import models.MessageCallbackModel;
 
 public class CommonUserAction implements UserAction {
@@ -36,12 +41,39 @@ public class CommonUserAction implements UserAction {
         .build();
 
 
-    public static List<Action> checkActions(MessageCallbackModel sentMessage) {
-        return new CommonUserAction().action(sentMessage);
+    public static List<Before> checkBefore(MessageCallbackModel sentMessage) {
+        return new CommonUserAction().before(sentMessage);
     }
 
     @Override
-    public List<Action> action(MessageCallbackModel sentMessage) {
+    public List<Before> before(MessageCallbackModel sentMessage) {
+        if ("bot".equals(sentMessage.getSenderType())) {
+            return Lists.newArrayList();
+        }
+
+        ImmutableList.Builder<Before> beforeList = new ImmutableList.Builder<>();
+        String text = sentMessage.getText().toLowerCase();
+
+        if (text.matches("^\\/funniest (today|this week|this month)")) {
+            String period = text
+                .replaceAll("\\/funniest ", "").replaceAll("this ", "").replaceAll("to", "");
+            beforeList.add(GetLikedMessagesBefore.newBuilder()
+                .setPeriod(period)
+                .build());
+        }
+
+        return beforeList.build();
+    }
+
+    public static List<Action> checkActions(
+        MessageCallbackModel sentMessage,
+        List<BeforeResult> results)
+    {
+        return new CommonUserAction().action(sentMessage, results);
+    }
+
+    @Override
+    public List<Action> action(MessageCallbackModel sentMessage, List<BeforeResult> results) {
         if ("bot".equals(sentMessage.getSenderType())) {
             return Lists.newArrayList();
         }
@@ -66,7 +98,35 @@ public class CommonUserAction implements UserAction {
                 .addAttachment(buildMentionsAttachment(mentionsMessage))
                 .build());
         }
+
+        if (text.matches("^\\/funniest (today|this week|this month)")) {
+            Optional<LikedMessagesModel> result = results.stream()
+                .filter(LikedMessagesModel.class::isInstance)
+                .map(LikedMessagesModel.class::cast)
+                .findFirst();
+
+            if (result.isPresent()) {
+                actionsList.add(MessageAction.newBuilder()
+                    .setMessageText("The funniest messages " + text.replaceAll("\\/funniest ", "") + " were...")
+                    .build());
+                actionsList.addAll(result.get().getMessages().subList(0, 3).stream()
+                    .map(CommonUserAction::buildMessageActionFromLikedMessages)
+                    .collect(Collectors.toList()));
+            }
+        }
+
         return actionsList.build();
+    }
+
+    private static MessageAction buildMessageActionFromLikedMessages(Message message) {
+        String author = "Author: " + message.getName() + "\n";
+        String likes = "Likes: " + message.getFavorited_by().size() + "\n";
+        return MessageAction.newBuilder()
+            .setMessageText(author + likes + Strings.nullToEmpty(message.getText()))
+            .setAttachments(message.getAttachments().stream()
+                .filter(a -> !a.getType().equals("mentions"))
+                .collect(Collectors.toList()))
+            .build();
     }
 
     private static String getMentionsMessage() {

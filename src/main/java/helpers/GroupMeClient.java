@@ -14,6 +14,9 @@ public interface GroupMeClient {
     @Get("/groups")
     String getGroups();
 
+    @Get("/groups/{groupId}/likes?period={period}&token={token}")
+    String getLikesForPeriod(@NotBlank String groupId, @NotBlank String period, @NotBlank String token);
+
     @Post("/groups/{groupId}/members/{memberId}/remove")
     void removeMember(@NotBlank String groupId, @NotBlank String memberId);
 

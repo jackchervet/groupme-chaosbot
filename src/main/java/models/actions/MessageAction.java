@@ -6,7 +6,7 @@ import java.util.List;
 import helpers.BotIdSupplier;
 import helpers.GroupMeClient;
 import models.BotPostModel;
-import models.BotPostModel.Attachment;
+import models.Attachment;
 import repositories.GroupMeRepository;
 
 public class MessageAction implements Action {

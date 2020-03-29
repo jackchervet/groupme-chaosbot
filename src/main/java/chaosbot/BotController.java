@@ -2,6 +2,7 @@ package chaosbot;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,6 +14,8 @@ import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import models.MessageCallbackModel;
 import models.actions.Action;
+import models.actions.Before;
+import models.actions.BeforeResult;
 import models.actions.UserAction;
 import models.actions.UserActionFactory;
 
@@ -31,7 +34,13 @@ public class BotController {
         Optional<UserAction> userAction = UserActionFactory.getActionForUser(message.getSenderId());
 
         if (userAction.isPresent()) {
-            List<Action> actions = userAction.get().action(message);
+            List<Before> befores = userAction.get().before(message);
+            List<BeforeResult> results = befores.stream()
+                .map(b -> b.performBefore(client))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+            List<Action> actions = userAction.get().action(message, results);
             actions.forEach(a -> a.performAction(client));
         }
     }
