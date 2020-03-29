@@ -9,6 +9,8 @@ public class UserActionFactory {
         new ImmutableMap.Builder<String, UserAction>()
             .put(GeppoUserAction.getId(), new GeppoUserAction())
             .put(JackUserAction.getId(), new JackUserAction())
+            .put(GioUserAction.getId(), new GioUserAction())
+            .put(ToxUserAction.getId(), new ToxUserAction())
             .build();
 
     public static Optional<UserAction> getActionForUser(String userId) {

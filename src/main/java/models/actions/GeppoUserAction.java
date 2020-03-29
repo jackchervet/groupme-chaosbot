@@ -3,11 +3,11 @@ package models.actions;
 import static chaosbot.BotController.FLAGS;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import com.google.common.collect.ImmutableList;
 
+import helpers.Users;
 import models.BotPostModel;
 import models.MessageCallbackModel;
 
@@ -26,7 +26,7 @@ public class GeppoUserAction implements UserAction {
         .build();
 
     public static String getId() {
-        return "64855034";
+        return Users.GEPPO_ID;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class GeppoUserAction implements UserAction {
 
         if (FLAGS.peppersOn()) {
             actionsList.add(MessageAction.newBuilder()
-                .setAttachment(new BotPostModel.Attachment.Builder()
+                .addAttachment(new BotPostModel.Attachment.Builder()
                     .setType("image")
                     .setUrl(getPepperImage())
                     .build())

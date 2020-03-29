@@ -1,6 +1,7 @@
 package models.actions;
 
-import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
 
 import helpers.BotIdSupplier;
 import helpers.GroupMeClient;
@@ -10,11 +11,11 @@ import repositories.GroupMeRepository;
 
 public class MessageAction implements Action {
     private String messageText;
-    private Attachment attachment;
+    private List<Attachment> attachments;
 
-    private MessageAction(String messageText, Attachment attachment) {
+    private MessageAction(String messageText, List<Attachment> attachments) {
         this.messageText = messageText;
-        this.attachment = attachment;
+        this.attachments = attachments;
     }
 
     @Override
@@ -29,12 +30,10 @@ public class MessageAction implements Action {
         BotPostModel message = new BotPostModel.Builder()
             .setBotId(BotIdSupplier.get().get())
             .setText(this.messageText)
-            .addAttachment(this.attachment)
+            .addAllAttachments(this.attachments)
         .build();
 
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(message));
-//        repo.sendMessageToGroup(message);
+        repo.sendMessageToGroup(message);
     }
 
     public static Builder newBuilder() {
@@ -43,20 +42,30 @@ public class MessageAction implements Action {
 
     public static class Builder {
         private String messageText = null;
-        private Attachment attachment = null;
+        private List<Attachment> attachments = new ArrayList<>();
 
         public Builder setMessageText(String messageText) {
             this.messageText = messageText;
             return this;
         }
 
-        public Builder setAttachment(Attachment attachment) {
-            this.attachment = attachment;
+        public Builder addAttachment(Attachment attachment) {
+            this.attachments.add(attachment);
+            return this;
+        }
+
+        public Builder addAllAttachments(List<Attachment> attachments) {
+            this.attachments.addAll(attachments);
+            return this;
+        }
+
+        public Builder setAttachments(List<Attachment> attachments) {
+            this.attachments = attachments;
             return this;
         }
 
         public MessageAction build() {
-            return new MessageAction(this.messageText, this.attachment);
+            return new MessageAction(this.messageText, this.attachments);
         }
     }
 }

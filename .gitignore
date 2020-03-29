@@ -13,4 +13,5 @@ out/
 .classpath
 AuthTokenSupplier.java
 BotIdSupplier.java
+Users.java
 deployment.yml

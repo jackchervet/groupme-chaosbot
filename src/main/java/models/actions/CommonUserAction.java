@@ -6,8 +6,8 @@ import java.util.Random;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 
+import helpers.Users;
 import models.BotPostModel.Attachment;
 import models.MessageCallbackModel;
 
@@ -22,18 +22,17 @@ public class CommonUserAction implements UserAction {
         .add("TRASH RECEPTACLE")
         .build();
 
-    // These use User Ids
     private static final ImmutableMap<String, String> USERS_TO_IDS = new ImmutableMap.Builder<String, String>()
-        .put("@Jack ", "16084546")
-        .put("@Z ", "19446214")
-        .put("@Tox ", "18738784")
-        .put("@George ", "18737760")
-        .put("@Geppo ", "64855034")
-        .put("@Gio ", "18738787")
-        .put("@John ", "20971400")
-        .put("@Mike ", "66362239")
-        .put("@Ben ", "36966668")
-        .put("@Tarik ", "33350232")
+        .put("@Jack ", Users.JACK_ID)
+        .put("@Z ", Users.Z_ID)
+        .put("@Tox ", Users.TOX_ID)
+        .put("@George ", Users.GEORGE_ID)
+        .put("@Geppo ", Users.GEPPO_ID)
+        .put("@Gio ", Users.GIO_ID)
+        .put("@John ", Users.JOHN_ID)
+        .put("@Mike ", Users.MIKE_ID)
+        .put("@Ben ", Users.BEN_ID)
+        .put("@Tarik ", Users.TARIK_ID)
         .build();
 
 
@@ -53,7 +52,7 @@ public class CommonUserAction implements UserAction {
         if (text.contains("new meme")) {
             actionsList.add(MessageAction.newBuilder()
                 .setMessageText("new meme guys")
-                .setAttachment(new Attachment.Builder()
+                .addAttachment(new Attachment.Builder()
                     .setType("image")
                     .setUrl("https://i.groupme.com/720x452.jpeg.668c3d3e124f45af8a9cef02763a4948")
                     .build())
@@ -64,7 +63,7 @@ public class CommonUserAction implements UserAction {
             String mentionsMessage = getMentionsMessage();
             actionsList.add(MessageAction.newBuilder()
                 .setMessageText(mentionsMessage)
-                .setAttachment(buildMentionsAttachment(mentionsMessage))
+                .addAttachment(buildMentionsAttachment(mentionsMessage))
                 .build());
         }
         return actionsList.build();

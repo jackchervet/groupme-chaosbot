@@ -11,7 +11,7 @@ public class BotPostModel {
     private BotPostModel(String botId, String text, List<Attachment> attachments) {
         this.bot_id = botId;
         this.text = text;
-        this.attachments = attachments;
+        this.attachments = attachments.isEmpty() ? null : attachments;
     }
 
     public static class Attachment {
@@ -28,8 +28,8 @@ public class BotPostModel {
         {
             this.type = type;
             this.url = url;
-            this.loci = loci;
-            this.user_ids = userIds;
+            this.loci = loci.isEmpty() ? null : loci;
+            this.user_ids = userIds.isEmpty() ? null : userIds;
         }
 
         public static class Builder {

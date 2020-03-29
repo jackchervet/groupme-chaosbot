@@ -1,5 +1,8 @@
 package helpers;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
@@ -12,8 +15,8 @@ public interface GroupMeClient {
     String getGroups();
 
     @Post("/groups/{groupId}/members/{memberId}/remove")
-    void removeMember(String groupId, String memberId);
+    void removeMember(@NotBlank String groupId, @NotBlank String memberId);
 
     @Post("/bots/post")
-    void postMessage(@Body String message);
+    void postMessage(@Body @Valid String message);
 }

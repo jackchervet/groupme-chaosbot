@@ -6,12 +6,13 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
+import helpers.Users;
 import models.MessageCallbackModel;
 
 public class JackUserAction implements UserAction {
 
     public static String getId() {
-        return "16084546";
+        return Users.JACK_ID;
     }
 
     @Override
@@ -34,6 +35,20 @@ public class JackUserAction implements UserAction {
             }
             
             FLAGS.setPeppers(!FLAGS.peppersOn());
+        }
+
+        if (text.startsWith("/tomdelonge")) {
+            if (FLAGS.tomDelongeOn()) {
+                actionsList.add(MessageAction.newBuilder()
+                    .setMessageText("Okay, I'm done. Wake up sheeple.")
+                    .build());
+            } else {
+                actionsList.add(MessageAction.newBuilder()
+                    .setMessageText("ALIENS")
+                    .build());
+            }
+
+            FLAGS.setTomDelonge(!FLAGS.tomDelongeOn());
         }
 
         return actionsList.build();
