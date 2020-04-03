@@ -9,10 +9,6 @@ public class Attachment {
     private List<List<Integer>> loci;
     private List<String> user_ids;
 
-    public String getType() {
-        return this.type;
-    }
-
     private Attachment(
         String type,
         String url,
@@ -23,6 +19,18 @@ public class Attachment {
         this.url = url;
         this.loci = loci.isEmpty() ? null : loci;
         this.user_ids = userIds.isEmpty() ? null : userIds;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public List<String> getUserIds() {
+        return user_ids;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     public static class Builder {

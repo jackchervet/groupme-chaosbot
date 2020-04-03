@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableList;
 
 import helpers.Users;
 import models.Attachment;
-import models.BotPostModel;
 import models.MessageCallbackModel;
 
 public class GeppoUserAction implements UserAction {

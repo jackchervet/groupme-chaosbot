@@ -15,4 +15,5 @@ AuthTokenSupplier.java
 BotIdSupplier.java
 Users.java
 Groups.java
+Members.java
 deployment.yml

@@ -17,8 +17,8 @@ public interface GroupMeClient {
     @Get("/groups/{groupId}/likes?period={period}&token={token}")
     String getLikesForPeriod(@NotBlank String groupId, @NotBlank String period, @NotBlank String token);
 
-    @Post("/groups/{groupId}/members/{memberId}/remove")
-    void removeMember(@NotBlank String groupId, @NotBlank String memberId);
+    @Post("/groups/{groupId}/members/{memberId}/remove?token={token}")
+    void removeMember(@NotBlank String groupId, @NotBlank String memberId, @NotBlank String token);
 
     @Post("/bots/post")
     void postMessage(@Body @Valid String message);

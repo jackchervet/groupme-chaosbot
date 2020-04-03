@@ -1,6 +1,9 @@
 package models;
 
+import java.util.List;
+
 public class MessageCallbackModel {
+    private List<Attachment> attachments;
     private String group_id;
     private String id;
     private String name;
@@ -35,5 +38,9 @@ public class MessageCallbackModel {
 
     public String getUserId() {
         return user_id;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
     }
 }

@@ -59,7 +59,7 @@ public class ApiGroupMeRepository implements GroupMeRepository {
 
     @Override
     public void removeUserFromGroup(String groupId, String membershipId) {
-        httpClient.removeMember(groupId, membershipId);
+        httpClient.removeMember(groupId, membershipId, authTokenSupplier.get());
     }
 
     @Override

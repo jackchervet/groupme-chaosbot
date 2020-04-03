@@ -58,6 +58,20 @@ public class JackUserAction implements UserAction {
             FLAGS.setTomDelonge(!FLAGS.tomDelongeOn());
         }
 
+        if (text.startsWith("/pvp")) {
+            if (FLAGS.duelsOn()) {
+                actionsList.add(MessageAction.newBuilder()
+                    .setMessageText("Lay down your arms, brothers. PVP mode is OFF.")
+                    .build());
+            } else {
+                actionsList.add(MessageAction.newBuilder()
+                    .setMessageText("Tally ho! Let the bloodshed begin. PVP mode is ON.")
+                    .build());
+            }
+
+            FLAGS.setDuels(!FLAGS.duelsOn());
+        }
+
         return actionsList.build();
     }
 

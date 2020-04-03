@@ -6,6 +6,7 @@ import javax.inject.Singleton;
 public class ActionFlags {
     private boolean peppers = false;
     private boolean tomDelonge = false;
+    private boolean duels = false;
 
     public boolean peppersOn() {
         return peppers;
@@ -21,5 +22,13 @@ public class ActionFlags {
 
     public void setTomDelonge(boolean tomDelonge) {
         this.tomDelonge = tomDelonge;
+    }
+
+    public boolean duelsOn() {
+        return duels;
+    }
+
+    public void setDuels(boolean duels) {
+        this.duels = duels;
     }
 }

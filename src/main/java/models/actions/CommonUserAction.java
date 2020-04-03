@@ -1,6 +1,10 @@
 package models.actions;
 
+import static chaosbot.BotController.FLAGS;
+
+import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -10,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import helpers.Groups;
 import helpers.Users;
 import models.Attachment;
 import models.LikedMessagesModel;
@@ -17,6 +22,13 @@ import models.LikedMessagesModel.Message;
 import models.MessageCallbackModel;
 
 public class CommonUserAction implements UserAction {
+    private static final ImmutableList<String> DUEL_GIFS = ImmutableList.of(
+        "https://media0.giphy.com/media/1qaUQO7L5YkxEiyZna/source.gif",
+        "https://thumbs.gfycat.com/DangerousSociableGalago-small.gif",
+        "https://media2.giphy.com/media/kaBU6pgv0OsPHz2yxy/giphy.gif",
+        "https://media0.giphy.com/media/l49FqlUguNsGDNCGk/source.gif",
+        "https://media.giphy.com/media/HVweQ5FuSFZJe/giphy.gif");
+
     private static final ImmutableList<String> BOX_REPLACEMENTS = new ImmutableList.Builder<String>()
         .add("BOX")
         .add("CRATE")
@@ -115,6 +127,10 @@ public class CommonUserAction implements UserAction {
             }
         }
 
+        if (text.startsWith("/duel") && FLAGS.duelsOn()) {
+            actionsList.addAll(buildDuelActions(sentMessage));
+        }
+
         return actionsList.build();
     }
 
@@ -157,5 +173,59 @@ public class CommonUserAction implements UserAction {
     private static String getBoxReplacement() {
         Random rand = new Random();
         return BOX_REPLACEMENTS.get(rand.nextInt(BOX_REPLACEMENTS.size()));
+    }
+
+    private static String duel(List<String> duelingUsers) {
+        Random rand = new Random();
+        return duelingUsers.get(rand.nextInt(duelingUsers.size()));
+    }
+
+    private static String getDuelGif() {
+        Random rand = new Random();
+        return DUEL_GIFS.get(rand.nextInt(DUEL_GIFS.size()));
+    }
+
+    private static List<Action> buildDuelActions(MessageCallbackModel sentMessage) {
+        if (sentMessage.getAttachments() == null || sentMessage.getAttachments().isEmpty()) {
+            return ImmutableList.of(MessageAction.newBuilder()
+                .setMessageText("Who do you want to duel? Type /duel and then tag one or more people.")
+                .build());
+        }
+
+        List<String> duelingUsers = sentMessage.getAttachments().stream()
+            .filter(a -> "mentions".equals(a.getType()))
+            .map(Attachment::getUserIds)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        if (!Users.JACK_ID.equals(sentMessage.getUserId())) {
+            duelingUsers.add(sentMessage.getUserId());
+        }
+
+        String loserId = duelingUsers.contains(Users.GEPPO_ID)
+            ? Users.GEPPO_ID
+            : duel(duelingUsers);
+
+        String loserName = USERS_TO_IDS.entrySet().stream()
+            .filter(e -> e.getValue().equals(loserId))
+            .map(Entry::getKey)
+            .findFirst()
+            .orElse("")
+            .replace("@", "")
+            .trim();
+
+        return ImmutableList.of(
+            MessageAction.newBuilder()
+                .setMessageText(loserName + " lost the duel!")
+                .addAttachment(Attachment.newBuilder()
+                    .setType("image")
+                    .setUrl(getDuelGif())
+                    .build())
+                .build(),
+            RemovalAction.newBuilder()
+                .setUserToRemove(Users.toMemberId.get(loserId))
+                .setGroupId(Groups.XBOX_ID)
+                .build()
+        );
     }
 }
