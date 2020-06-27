@@ -196,6 +196,7 @@ public class CommonUserAction implements UserAction {
             .filter(a -> "mentions".equals(a.getType()))
             .map(Attachment::getUserIds)
             .flatMap(Collection::stream)
+            .filter(s -> !Users.JACK_ID.equals(s))
             .collect(Collectors.toList());
 
         if (!Users.JACK_ID.equals(sentMessage.getUserId())) {
