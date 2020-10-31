@@ -5,6 +5,7 @@ build/
 target/
 out/
 .idea
+.vscode
 *.iml
 *.ipr
 *.iws
@@ -17,3 +18,4 @@ Users.java
 Groups.java
 Members.java
 deployment.yml
+chaosbot-azure.yaml

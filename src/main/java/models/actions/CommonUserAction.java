@@ -131,6 +131,10 @@ public class CommonUserAction implements UserAction {
             actionsList.addAll(buildDuelActions(sentMessage));
         }
 
+        if (text.startsWith("/help")) {
+            actionsList.add(buildHelpMessage());
+        }
+
         return actionsList.build();
     }
 
@@ -228,5 +232,15 @@ public class CommonUserAction implements UserAction {
                 .setGroupId(Groups.XBOX_ID)
                 .build()
         );
+    }
+
+    private static Action buildHelpMessage() {
+        return MessageAction.newBuilder()
+            .setMessageText(
+                "I can do a lot of stuff. Here's what I know about:\n\n" +
+                "rally to me! \t\t @ everyone to get on.\n" +
+                "/duel @[1 or more other users] \t\t Duel someone else. Loser will be kicked from the chat.\n\n" +
+                "new meme \t\t Post a new meme")
+            .build();
     }
 }
