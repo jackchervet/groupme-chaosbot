@@ -1,7 +1,7 @@
 package repositories;
 
-import cache.Cache;
 import clients.HiRezClient;
+import com.google.common.cache.Cache;
 import models.hirez.MatchData;
 import models.hirez.PlayerInfo;
 
@@ -11,7 +11,7 @@ public interface HiRezRepository {
     List<MatchData> getLatestMatches(String playerId);
     PlayerInfo getPlayerIdsByGamertag(String gamerTag);
 
-    static HiRezRepository get(HiRezClient client, Cache cache) {
+    static HiRezRepository get(HiRezClient client, Cache<String, Object> cache) {
         return new ApiHiRezRepository(client, cache);
     }
 }

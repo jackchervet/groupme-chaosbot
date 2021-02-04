@@ -2,17 +2,21 @@ package chaosbot;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import cache.Cache;
 import clients.HiRezClient;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 
 import clients.GroupMeClient;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.*;
+import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Controller;
+import io.micronaut.http.annotation.Post;
 import models.MessageCallbackModel;
 import models.actions.Action;
 import models.actions.Before;
@@ -27,7 +31,9 @@ public class BotController {
 
     @Inject private GroupMeClient groupMeClient;
     @Inject private HiRezClient hiRezClient;
-    private final Cache cache = Cache.get();
+    private final Cache<String, Object> sessionCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(15, TimeUnit.MINUTES)
+            .build();
 
     @Post("/messageAdded")
     public void messageAdded(@Body String body) {
@@ -39,7 +45,7 @@ public class BotController {
         if (userAction.isPresent()) {
             List<Before> befores = userAction.get().before(message);
             List<BeforeResult> results = befores.stream()
-                .map(b -> b.performBefore(groupMeClient, hiRezClient, cache))
+                .map(b -> b.performBefore(groupMeClient, hiRezClient, sessionCache))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());

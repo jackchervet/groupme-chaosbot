@@ -1,7 +1,7 @@
 package repositories;
 
-import cache.Cache;
 import clients.HiRezClient;
+import com.google.common.cache.Cache;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import helpers.HiRezAuthSupplier;
@@ -12,33 +12,33 @@ import models.hirez.RequestBase;
 import models.hirez.Session;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ApiHiRezRepository implements HiRezRepository {
     private final HiRezClient httpClient;
-    private final Cache cache;
+    private final Cache<String, Object> cache;
     private static final long SESSION_TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
-    public ApiHiRezRepository(HiRezClient httpClient, Cache cache) {
+    public ApiHiRezRepository(HiRezClient httpClient, Cache<String, Object> cache) {
         this.httpClient = httpClient;
         this.cache = cache;
     }
 
     private Session getSession() {
-        return (Session) cache.get("session").orElseGet(this::createNewSession);
+        return (Session) Optional.ofNullable(cache.getIfPresent("session")).orElseGet(this::createNewSession);
     }
 
     private Session createNewSession() {
         Gson gson = new Gson();
         RequestBase req = HiRezAuthSupplier.getSignature("createsession");
-        String resp = httpClient.createSession(HiRezAuthSupplier.getDevId(), req.getSignature(), req.getTimestamp());
-        System.out.println("Created new session: " + resp);
         Session session = gson.fromJson(
-            resp,
+            httpClient.createSession(HiRezAuthSupplier.getDevId(), req.getSignature(), req.getTimestamp()),
             Session.class
         );
-        cache.add("session", session, System.currentTimeMillis() + SESSION_TIMEOUT_IN_MILLIS);
+        System.out.println("Created new session: " + session.getSession_id());
+        cache.put("session", session);
         return session;
     }
 

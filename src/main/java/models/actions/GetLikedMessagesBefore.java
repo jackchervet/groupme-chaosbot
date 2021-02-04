@@ -2,9 +2,9 @@ package models.actions;
 
 import java.util.Optional;
 
-import cache.Cache;
 import clients.HiRezClient;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
 import com.google.gson.Gson;
 
 import helpers.AuthTokenSupplier;
@@ -21,7 +21,7 @@ public class GetLikedMessagesBefore implements Before {
     }
 
     @Override
-    public Optional<BeforeResult> performBefore(GroupMeClient groupMeClient, HiRezClient hiRezClient, Cache cache) {
+    public Optional<BeforeResult> performBefore(GroupMeClient groupMeClient, HiRezClient hiRezClient, Cache<String, Object> cache) {
         String resp = groupMeClient.getLikesForPeriod(Groups.XBOX_ID, period, token);
         return !Strings.isNullOrEmpty(resp)
             ? Optional.of(new Gson().fromJson(resp, LikedMessagesModel.class))

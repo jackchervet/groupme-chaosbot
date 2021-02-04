@@ -33,7 +33,8 @@ public class MessageAction implements Action {
             .addAllAttachments(this.attachments)
         .build();
 
-        repo.sendMessageToGroup(message);
+//        repo.sendMessageToGroup(message);
+        System.out.println(messageText);
     }
 
     public static Builder newBuilder() {
