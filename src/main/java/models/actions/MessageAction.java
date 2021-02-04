@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import helpers.BotIdSupplier;
-import helpers.GroupMeClient;
+import clients.GroupMeClient;
 import models.BotPostModel;
 import models.Attachment;
 import repositories.GroupMeRepository;
@@ -33,7 +33,8 @@ public class MessageAction implements Action {
             .addAllAttachments(this.attachments)
         .build();
 
-        repo.sendMessageToGroup(message);
+//        repo.sendMessageToGroup(message);
+        System.out.println(messageText);
     }
 
     public static Builder newBuilder() {

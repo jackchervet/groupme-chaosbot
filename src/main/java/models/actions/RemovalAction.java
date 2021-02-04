@@ -1,6 +1,6 @@
 package models.actions;
 
-import helpers.GroupMeClient;
+import clients.GroupMeClient;
 import repositories.GroupMeRepository;
 
 public class RemovalAction implements Action {

@@ -17,5 +17,7 @@ BotIdSupplier.java
 Users.java
 Groups.java
 Members.java
+HiRezAuthSupplier.java
+PlayerIds.java
 deployment.yml
 chaosbot-azure.yaml

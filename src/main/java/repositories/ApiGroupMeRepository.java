@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import helpers.GroupMeClient;
+import clients.GroupMeClient;
 import models.BotPostModel;
 import models.GroupModel;
 import models.MessageCallbackModel;

@@ -1,6 +1,6 @@
 package models.actions;
 
-import helpers.GroupMeClient;
+import clients.GroupMeClient;
 
 public class NoAction implements Action {
     @Override

@@ -1,4 +1,4 @@
-package helpers;
+package clients;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;

@@ -20,6 +20,8 @@ import models.Attachment;
 import models.LikedMessagesModel;
 import models.LikedMessagesModel.Message;
 import models.MessageCallbackModel;
+import models.hirez.ListMatchData;
+import models.hirez.MatchData;
 
 public class CommonUserAction implements UserAction {
     private static final ImmutableList<String> DUEL_GIFS = ImmutableList.of(
@@ -71,6 +73,13 @@ public class CommonUserAction implements UserAction {
                 .replaceAll("\\/funniest ", "").replaceAll("this ", "").replaceAll("to", "");
             beforeList.add(GetLikedMessagesBefore.newBuilder()
                 .setPeriod(period)
+                .build());
+        }
+
+        if (text.equals("/lastmatch") && Users.TO_PLAYER_ID.containsKey(sentMessage.getSenderId())) {
+            beforeList.add(GetLatestMatchesBefore.newBuilder()
+                .setPlayerId(Users.TO_PLAYER_ID.get(sentMessage.getSenderId()))
+                .setNumberOfMatches(1)
                 .build());
         }
 
@@ -133,6 +142,15 @@ public class CommonUserAction implements UserAction {
 
         if (text.startsWith("/help")) {
             actionsList.add(buildHelpMessage());
+        }
+
+        if (text.equals("/lastmatch")) {
+            Optional<ListMatchData> result = results.stream()
+                .filter(ListMatchData.class::isInstance)
+                .map(ListMatchData.class::cast)
+                .findFirst();
+
+            result.ifPresent(listMatchData -> actionsList.add(buildLastMatchResponse(listMatchData)));
         }
 
         return actionsList.build();
@@ -234,13 +252,33 @@ public class CommonUserAction implements UserAction {
         );
     }
 
+    private static MessageAction buildLastMatchResponse(ListMatchData listMatchData) {
+        MatchData match = listMatchData.getData().get(0);
+        return MessageAction.newBuilder()
+            .setMessageText(
+                "Here are the stats for your last match:\n\n" +
+                "Mode: " + match.getQueue() + "\n" +
+                "God: " + match.getGod() + "\n" +
+                "KDA: " + match.getKills() + "/" + match.getDeaths() + "/" + match.getAssists() + "\n" +
+                "Damage Taken: " + match.getDamage_Taken() + "\n" +
+                "Damage Mitigated: " + match.getDamage_Mitigated() + "\n" +
+                "Structure Damage: " + match.getDamage_Structure() + "\n" +
+                "Damage: " + match.getDamage() + "\n" +
+                "Healing: " + match.getHealing() + "\n" +
+                "Gold: " + match.getGold() + "\n\n" +
+                "Result: " + match.getWin_Status() + ""
+            ).build();
+
+    }
+
     private static Action buildHelpMessage() {
         return MessageAction.newBuilder()
             .setMessageText(
                 "I can do a lot of stuff. Here's what I know about:\n\n" +
-                "rally to me! \t\t @ everyone to get on.\n" +
-                "/duel @[1 or more other users] \t\t Duel someone else. Loser will be kicked from the chat.\n\n" +
-                "new meme \t\t Post a new meme")
+                "- rally to me! --- @ everyone to get on.\n" +
+                "- /duel @[1 or more other users] --- Duel someone else. Loser will be kicked from the chat.\n\n" +
+                "- new meme --- Post a new meme\n\n" +
+                "- /lastmatch --- Get your stats from the last Smite match you played.")
             .build();
     }
 }

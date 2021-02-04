@@ -2,8 +2,10 @@ package models.actions;
 
 import java.util.Optional;
 
-import helpers.GroupMeClient;
+import cache.Cache;
+import clients.GroupMeClient;
+import clients.HiRezClient;
 
 public interface Before {
-    Optional<BeforeResult> performBefore(GroupMeClient client);
+    Optional<BeforeResult> performBefore(GroupMeClient groupMeClient, HiRezClient hiRezClient, Cache cache);
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import helpers.AuthTokenSupplier;
-import helpers.GroupMeClient;
+import clients.GroupMeClient;
 import models.BotPostModel;
 import models.GroupModel;
 import models.MessageCallbackModel;
