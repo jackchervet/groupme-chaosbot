@@ -76,7 +76,7 @@ public class CommonUserAction implements UserAction {
                 .build());
         }
 
-        if (text.equals("/lastmatch") && Users.TO_PLAYER_ID.containsKey(sentMessage.getSenderId())) {
+        if (text.startsWith("/lastmatch") && Users.TO_PLAYER_ID.containsKey(sentMessage.getSenderId())) {
             beforeList.add(GetLatestMatchesBefore.newBuilder()
                 .setPlayerId(Users.TO_PLAYER_ID.get(sentMessage.getSenderId()))
                 .setNumberOfMatches(1)
@@ -144,13 +144,16 @@ public class CommonUserAction implements UserAction {
             actionsList.add(buildHelpMessage());
         }
 
-        if (text.equals("/lastmatch")) {
+        if (text.startsWith("/lastmatch")) {
             Optional<ListMatchData> result = results.stream()
                 .filter(ListMatchData.class::isInstance)
                 .map(ListMatchData.class::cast)
                 .findFirst();
 
-            result.ifPresent(listMatchData -> actionsList.add(buildLastMatchResponse(listMatchData)));
+            result.map(listMatchData -> actionsList.add(buildLastMatchResponse(listMatchData)))
+                .orElseGet(() ->
+                    actionsList.add(MessageAction.newBuilder().setMessageText("You don't play Smite...").build())
+                );
         }
 
         return actionsList.build();
