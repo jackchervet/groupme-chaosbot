@@ -3,11 +3,15 @@ package models.actions;
 import static chaosbot.BotController.FLAGS;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -83,6 +87,15 @@ public class CommonUserAction implements UserAction {
                 .build());
         }
 
+        if (text.startsWith("/feeders")) {
+            beforeList.addAll(Users.TO_PLAYER_ID.values().stream()
+                .map(playerId -> GetLatestMatchesBefore.newBuilder()
+                    .setPlayerId(playerId)
+                    .setNumberOfMatches(10)
+                    .build())
+                .collect(Collectors.toList()));
+        }
+
         return beforeList.build();
     }
 
@@ -154,6 +167,31 @@ public class CommonUserAction implements UserAction {
                 .orElseGet(() ->
                     actionsList.add(MessageAction.newBuilder().setMessageText("You don't play Smite...").build())
                 );
+        }
+
+        if (text.startsWith("/feeders")) {
+            List<ListMatchData> result = results.stream()
+                .filter(ListMatchData.class::isInstance)
+                .map(ListMatchData.class::cast)
+                .collect(Collectors.toList());
+
+            List<String> body = result.stream()
+                .map(CommonUserAction::buildFeedingMessage)
+                .sorted(Comparator.comparing(map -> Lists.newArrayList(map.values()).get(0).get(1), Comparator.reverseOrder()))
+                .map(Map::entrySet)
+                .map(set -> Lists.newArrayList(set).get(0))
+                .map(e -> e.getKey() + ":: " + e.getValue().get(0) + "/" + e.getValue().get(1) + "/" + e.getValue().get(2))
+                .collect(Collectors.toList());
+
+            actionsList.add(MessageAction.newBuilder()
+                .setMessageText(
+                    "The biggest feeders recently are...\n\n" +
+                    "(Name :: Average KDA over last 10 games)\n\n" +
+                    IntStream.range(0, body.size())
+                        .mapToObj(i -> i+1 + ". " + body.get(i))
+                        .collect(Collectors.joining("\n"))
+                )
+                .build());
         }
 
         return actionsList.build();
@@ -272,6 +310,39 @@ public class CommonUserAction implements UserAction {
                 "Result: " + match.getWin_Status() + ""
             ).build();
 
+    }
+
+    private static BinaryOperator<List<Integer>> sumElements = (List<Integer> first, List<Integer> second) -> {
+      if (first.size() != second.size()) {
+          return ImmutableList.of();
+      }
+
+      return IntStream.range(0, first.size())
+        .map(i -> (first.get(i) + second.get(i)))
+        .boxed()
+        .collect(Collectors.toList());
+    };
+
+    private static Map<String, List<Double>> buildFeedingMessage(ListMatchData listMatchData) {
+        List<Double> avgKDA = listMatchData.getData().stream()
+            .map(matchData -> ImmutableList.of(matchData.getKills(), matchData.getDeaths(), matchData.getAssists()))
+            .collect(Collectors.collectingAndThen(
+                Collectors.reducing(sumElements),
+                list -> list.map(l -> l.stream()
+                    .map(Integer::doubleValue)
+                    .map(val -> val / listMatchData.getData().size())
+                    .collect(Collectors.toList()))
+                    .orElse(ImmutableList.of())
+            ));
+
+        String playerId = Users.TO_PLAYER_ID.entrySet().stream()
+            .filter(e -> e.getValue().equals(listMatchData.getData().get(0).getPlayerId().toString()))
+            .map(e -> USERS_TO_IDS.entrySet().stream().collect(Collectors.toMap(Entry::getValue, Entry::getKey)).get(e.getKey()))
+            .map(s -> s.replace("@", ""))
+            .findFirst()
+            .orElse("UNKNOWN");
+
+        return ImmutableMap.of(playerId, avgKDA);
     }
 
     private static Action buildHelpMessage() {
