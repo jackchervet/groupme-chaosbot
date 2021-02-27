@@ -21,3 +21,4 @@ HiRezAuthSupplier.java
 PlayerIds.java
 deployment.yml
 chaosbot-azure.yaml
+GroupMe-ChaosBot-serviceAccount.json

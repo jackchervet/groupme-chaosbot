@@ -13,7 +13,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 
 import clients.GroupMeClient;
-import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
@@ -23,7 +22,6 @@ import models.actions.Before;
 import models.actions.BeforeResult;
 import models.actions.UserAction;
 import models.actions.UserActionFactory;
-import repositories.HiRezRepository;
 
 @Controller("/bot")
 public class BotController {
@@ -53,21 +51,4 @@ public class BotController {
             actions.forEach(a -> a.performAction(groupMeClient));
         }
     }
-
-    // For Debugging use
-/*
-    @Get("/latestMatches")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String latestMatches(@QueryValue String playerId) {
-        Gson gson = new Gson();
-        return gson.toJson(HiRezRepository.get(hiRezClient, cache).getLatestMatches(playerId));
-    }
-
-    @Get("/getPlayerId")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getPlayerIdByGamertag(@QueryValue String gamertag) {
-        Gson gson = new Gson();
-        return gson.toJson(HiRezRepository.get(hiRezClient, cache).getPlayerIdsByGamertag(gamertag));
-    }
-*/
 }

@@ -29,6 +29,10 @@ public class Attachment {
         return user_ids;
     }
 
+    public String getUrl() {
+        return this.url;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }

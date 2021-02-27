@@ -26,6 +26,7 @@ import models.LikedMessagesModel.Message;
 import models.MessageCallbackModel;
 import models.hirez.ListMatchData;
 import models.hirez.MatchData;
+import repositories.ImageAnnotatorRepository;
 
 public class CommonUserAction implements UserAction {
     private static final ImmutableList<String> DUEL_GIFS = ImmutableList.of(
@@ -70,7 +71,7 @@ public class CommonUserAction implements UserAction {
         }
 
         ImmutableList.Builder<Before> beforeList = new ImmutableList.Builder<>();
-        String text = sentMessage.getText().toLowerCase();
+        String text = Strings.nullToEmpty(sentMessage.getText()).toLowerCase();
 
         if (text.matches("^\\/funniest (today|this week|this month)")) {
             String period = text
@@ -113,7 +114,26 @@ public class CommonUserAction implements UserAction {
         }
 
         ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
-        String text = sentMessage.getText().toLowerCase();
+        String text = Strings.nullToEmpty(sentMessage.getText()).toLowerCase();
+
+        if (!sentMessage.getSenderId().equals(Users.JACK_ID) &&
+            sentMessage.getAttachments().stream().anyMatch(a -> a.getType().equals("image")))
+        {
+            List<String> imageUris = sentMessage.getAttachments().stream()
+                .filter(a -> a.getType().equals("image"))
+                .map(Attachment::getUrl)
+                .collect(Collectors.toList());
+
+            if (ImageAnnotatorRepository.get().isUnacceptedImage(imageUris)) {
+                actionsList.add(MessageAction.newBuilder()
+                    .setMessageText("You know the law...")
+                    .build());
+                actionsList.add(RemovalAction.newBuilder()
+                    .setUserToRemove(sentMessage.getSenderId())
+                    .setGroupId(Groups.XBOX_ID)
+                    .build());
+            }
+        }
 
         if (text.contains("new meme")) {
             actionsList.add(MessageAction.newBuilder()
