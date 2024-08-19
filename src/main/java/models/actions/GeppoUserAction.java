@@ -43,7 +43,7 @@ public class GeppoUserAction implements UserAction {
         actionsList.addAll(CommonUserAction.checkActions(sentMessage, results));
 
         if (FLAGS.peppersOn()) {
-            actionsList.add(MessageAction.newBuilder()
+            actionsList.add(SendMessageAction.newBuilder()
                 .addAttachment(new Attachment.Builder()
                     .setType("image")
                     .setUrl(getPepperImage())

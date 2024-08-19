@@ -69,4 +69,9 @@ public class ApiGroupMeRepository implements GroupMeRepository {
         System.out.println("message: " + m);
         httpClient.postMessage(m);
     }
+
+    @Override
+    public void deleteMessage(String groupId, String messageId) {
+        httpClient.deleteMessage(groupId, messageId, authTokenSupplier.get());
+    }
 }

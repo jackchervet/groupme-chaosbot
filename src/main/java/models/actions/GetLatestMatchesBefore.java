@@ -1,5 +1,6 @@
 package models.actions;
 
+import clients.GPT4oClient;
 import clients.GroupMeClient;
 import clients.HiRezClient;
 import com.google.common.cache.Cache;
@@ -20,7 +21,7 @@ public class GetLatestMatchesBefore implements Before {
     }
 
     @Override
-    public Optional<BeforeResult> performBefore(GroupMeClient groupMeClient, HiRezClient hiRezClient, Cache<String, Object> cache) {
+    public Optional<BeforeResult> performBefore(GroupMeClient groupMeClient, HiRezClient hiRezClient, GPT4oClient gptClient, Cache<String, Object> cache) {
         HiRezRepository hirezRepo = HiRezRepository.get(hiRezClient, cache);
         List<MatchData> matches = hirezRepo.getLatestMatches(playerId);
 

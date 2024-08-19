@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import clients.GPT4oClient;
 import clients.HiRezClient;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -29,6 +30,7 @@ public class BotController {
 
     @Inject private GroupMeClient groupMeClient;
     @Inject private HiRezClient hiRezClient;
+    @Inject private GPT4oClient gptClient;
     private final Cache<String, Object> sessionCache = CacheBuilder.newBuilder()
             .expireAfterWrite(15, TimeUnit.MINUTES)
             .build();
@@ -43,7 +45,7 @@ public class BotController {
         if (userAction.isPresent()) {
             List<Before> befores = userAction.get().before(message);
             List<BeforeResult> results = befores.stream()
-                .map(b -> b.performBefore(groupMeClient, hiRezClient, sessionCache))
+                .map(b -> b.performBefore(groupMeClient, hiRezClient, gptClient, sessionCache))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());

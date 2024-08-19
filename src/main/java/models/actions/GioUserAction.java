@@ -28,7 +28,7 @@ public class GioUserAction implements UserAction {
         String text = sentMessage.getText().toLowerCase();
 
         if (text.matches("^\\/.*shack")) {
-            actionsList.add(MessageAction.newBuilder()
+            actionsList.add(SendMessageAction.newBuilder()
                 .setMessageText("https://www.youtube.com/watch?v=YWyHZNBz6FE")
                 .build());
         }

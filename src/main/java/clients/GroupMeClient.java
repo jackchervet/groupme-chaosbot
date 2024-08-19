@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import io.micronaut.http.annotation.Body;
+import io.micronaut.http.annotation.Delete;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.Post;
 import io.micronaut.http.client.annotation.Client;
@@ -22,4 +23,7 @@ public interface GroupMeClient {
 
     @Post("/bots/post")
     void postMessage(@Body @Valid String message);
+
+    @Delete("/conversations/{groupId}/messages/{messageId}?token={token}")
+    void deleteMessage(@NotBlank String groupId, @NotBlank String messageId, @NotBlank String token);
 }

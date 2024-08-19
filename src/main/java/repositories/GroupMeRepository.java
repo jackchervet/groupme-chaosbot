@@ -17,6 +17,7 @@ public interface GroupMeRepository {
 
     void removeUserFromGroup(String groupId, String membershipId);
     void sendMessageToGroup(BotPostModel message);
+    void deleteMessage(String groupId, String messageId);
 
     static GroupMeRepository get(GroupMeClient client) {
         return new ApiGroupMeRepository(AuthTokenSupplier.get(), client);

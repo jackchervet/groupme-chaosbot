@@ -2,13 +2,12 @@ package models.actions;
 
 import static chaosbot.BotController.FLAGS;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Random;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,7 +25,6 @@ import models.LikedMessagesModel.Message;
 import models.MessageCallbackModel;
 import models.hirez.ListMatchData;
 import models.hirez.MatchData;
-import repositories.ImageAnnotatorRepository;
 
 public class CommonUserAction implements UserAction {
     private static final ImmutableList<String> DUEL_GIFS = ImmutableList.of(
@@ -116,27 +114,8 @@ public class CommonUserAction implements UserAction {
         ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
         String text = Strings.nullToEmpty(sentMessage.getText()).toLowerCase();
 
-        if (!sentMessage.getSenderId().equals(Users.JACK_ID) &&
-            sentMessage.getAttachments().stream().anyMatch(a -> a.getType().equals("image")))
-        {
-            List<String> imageUris = sentMessage.getAttachments().stream()
-                .filter(a -> a.getType().equals("image"))
-                .map(Attachment::getUrl)
-                .collect(Collectors.toList());
-
-            if (ImageAnnotatorRepository.get().isUnacceptedImage(imageUris)) {
-                actionsList.add(MessageAction.newBuilder()
-                    .setMessageText("You know the law...")
-                    .build());
-                actionsList.add(RemovalAction.newBuilder()
-                    .setUserToRemove(sentMessage.getSenderId())
-                    .setGroupId(Groups.XBOX_ID)
-                    .build());
-            }
-        }
-
         if (text.contains("new meme")) {
-            actionsList.add(MessageAction.newBuilder()
+            actionsList.add(SendMessageAction.newBuilder()
                 .setMessageText("new meme guys")
                 .addAttachment(new Attachment.Builder()
                     .setType("image")
@@ -147,7 +126,7 @@ public class CommonUserAction implements UserAction {
 
         if (text.matches("rally to me\\!*")) {
             String mentionsMessage = getMentionsMessage();
-            actionsList.add(MessageAction.newBuilder()
+            actionsList.add(SendMessageAction.newBuilder()
                 .setMessageText(mentionsMessage)
                 .addAttachment(buildMentionsAttachment(mentionsMessage))
                 .build());
@@ -160,7 +139,7 @@ public class CommonUserAction implements UserAction {
                 .findFirst();
 
             if (result.isPresent()) {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("The funniest messages " + text.replaceAll("\\/funniest ", "") + " were...")
                     .build());
                 actionsList.addAll(result.get().getMessages().subList(0, 3).stream()
@@ -185,7 +164,7 @@ public class CommonUserAction implements UserAction {
 
             result.map(listMatchData -> actionsList.add(buildLastMatchResponse(listMatchData)))
                 .orElseGet(() ->
-                    actionsList.add(MessageAction.newBuilder().setMessageText("You don't play Smite...").build())
+                    actionsList.add(SendMessageAction.newBuilder().setMessageText("You don't play Smite...").build())
                 );
         }
 
@@ -203,7 +182,7 @@ public class CommonUserAction implements UserAction {
                 .map(e -> e.getKey() + ":: " + e.getValue().get(0) + "/" + e.getValue().get(1) + "/" + e.getValue().get(2))
                 .collect(Collectors.toList());
 
-            actionsList.add(MessageAction.newBuilder()
+            actionsList.add(SendMessageAction.newBuilder()
                 .setMessageText(
                     "The biggest feeders recently are...\n\n" +
                     "(Name :: Average KDA over last 10 games)\n\n" +
@@ -214,13 +193,59 @@ public class CommonUserAction implements UserAction {
                 .build());
         }
 
+        Optional<ImageUnnacceptableBeforeResult> imageUnacceptable = results.stream()
+            .filter(ImageUnnacceptableBeforeResult.class::isInstance)
+            .map(ImageUnnacceptableBeforeResult.class::cast)
+            .findFirst();
+
+        if (imageUnacceptable.isPresent() && imageUnacceptable.get().isUnnacceptable()) {
+            actionsList.add(
+                DeleteMessageAction.newBuilder()
+                    .setMessageId(sentMessage.getId())
+                    .setGroupId(sentMessage.getGroupId())
+                    .build()
+            );
+            actionsList.add(
+                SendMessageAction.newBuilder()
+                    .setMessageText("no no no")
+                    .addAttachment(
+                        Attachment.newBuilder()
+                            .setType("image")
+                            .setUrl("https://i.groupme.com/220x123.gif.2246e6dbceb14083bae90500140bc606")
+                            .build()
+                    )
+                    .build()
+            );
+        }
+
         return actionsList.build();
     }
 
-    private static MessageAction buildMessageActionFromLikedMessages(Message message) {
+    private static byte[] encodeImageToBytes(String imageUrl) throws Exception {
+        // Open a connection to the URL
+        URL url = new URL(imageUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        // Read the image data into a byte array
+        try (InputStream inputStream = connection.getInputStream();
+             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Convert byte array to base64 encoded string
+            return byteArrayOutputStream.toByteArray();
+        }
+    }
+
+    private static SendMessageAction buildMessageActionFromLikedMessages(Message message) {
         String author = "Author: " + message.getName() + "\n";
         String likes = "Likes: " + message.getFavorited_by().size() + "\n";
-        return MessageAction.newBuilder()
+        return SendMessageAction.newBuilder()
             .setMessageText(author + likes + Strings.nullToEmpty(message.getText()))
             .setAttachments(message.getAttachments().stream()
                 .filter(a -> !a.getType().equals("mentions"))
@@ -270,7 +295,7 @@ public class CommonUserAction implements UserAction {
 
     private static List<Action> buildDuelActions(MessageCallbackModel sentMessage) {
         if (sentMessage.getAttachments() == null || sentMessage.getAttachments().isEmpty()) {
-            return ImmutableList.of(MessageAction.newBuilder()
+            return ImmutableList.of(SendMessageAction.newBuilder()
                 .setMessageText("Who do you want to duel? Type /duel and then tag one or more people.")
                 .build());
         }
@@ -299,7 +324,7 @@ public class CommonUserAction implements UserAction {
             .trim();
 
         return ImmutableList.of(
-            MessageAction.newBuilder()
+            SendMessageAction.newBuilder()
                 .setMessageText(loserName + " lost the duel!")
                 .addAttachment(Attachment.newBuilder()
                     .setType("image")
@@ -313,9 +338,9 @@ public class CommonUserAction implements UserAction {
         );
     }
 
-    private static MessageAction buildLastMatchResponse(ListMatchData listMatchData) {
+    private static SendMessageAction buildLastMatchResponse(ListMatchData listMatchData) {
         MatchData match = listMatchData.getData().get(0);
-        return MessageAction.newBuilder()
+        return SendMessageAction.newBuilder()
             .setMessageText(
                 "Here are the stats for your last match:\n\n" +
                 "Mode: " + match.getQueue() + "\n" +
@@ -366,7 +391,7 @@ public class CommonUserAction implements UserAction {
     }
 
     private static Action buildHelpMessage() {
-        return MessageAction.newBuilder()
+        return SendMessageAction.newBuilder()
             .setMessageText(
                 "I can do a lot of stuff. Here's what I know about:\n\n" +
                 "- rally to me! --- @ everyone to get on.\n" +

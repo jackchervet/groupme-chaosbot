@@ -4,12 +4,12 @@ import static chaosbot.BotController.FLAGS;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
 import helpers.Users;
 import models.Attachment;
-import models.BotPostModel;
 import models.MessageCallbackModel;
 
 public class ToxUserAction implements UserAction {
@@ -34,6 +34,19 @@ public class ToxUserAction implements UserAction {
     @Override
     public List<Before> before(MessageCallbackModel sentMessage) {
         ImmutableList.Builder<Before> befores = new ImmutableList.Builder<>();
+        if (sentMessage.getAttachments().stream().anyMatch(a -> a.getType().equals("image") || a.getType().equals("video"))) {
+            List<String> imageUris = sentMessage.getAttachments().stream()
+                    .filter(a -> a.getType().equals("image") || a.getType().equals("video"))
+                    .map(attachment -> {
+                        if (attachment.getType().equals("image")) {
+                            return attachment.getUrl();
+                        } else {
+                            return attachment.getPreviewUrl();
+                        }
+                    })
+                    .collect(Collectors.toList());
+            befores.add(new CheckImageContentBefore(imageUris));
+        }
         befores.addAll(CommonUserAction.checkBefore(sentMessage));
         return befores.build();
     }
@@ -43,7 +56,6 @@ public class ToxUserAction implements UserAction {
         ImmutableList.Builder<Action> actionsList = new ImmutableList.Builder<>();
 
         actionsList.addAll(CommonUserAction.checkActions(sentMessage, results));
-
         if (FLAGS.tomDelongeOn()) {
             actionsList.add(getRandomMessageAction());
         }
@@ -51,17 +63,17 @@ public class ToxUserAction implements UserAction {
         return actionsList.build();
     }
 
-    private static MessageAction getRandomMessageAction() {
+    private static SendMessageAction getRandomMessageAction() {
         Random rand = new Random();
         if (rand.nextInt() % 2 == 0) {
-            return MessageAction.newBuilder()
+            return SendMessageAction.newBuilder()
                 .addAttachment(new Attachment.Builder()
                     .setType("image")
                     .setUrl(IMAGES.get(rand.nextInt(IMAGES.size())))
                     .build())
                 .build();
         } else {
-            return MessageAction.newBuilder()
+            return SendMessageAction.newBuilder()
                 .setMessageText(VIDEOS.get(rand.nextInt(VIDEOS.size())))
                 .build();
         }

@@ -9,18 +9,18 @@ import models.BotPostModel;
 import models.Attachment;
 import repositories.GroupMeRepository;
 
-public class MessageAction implements Action {
+public class SendMessageAction implements Action {
     private String messageText;
     private List<Attachment> attachments;
 
-    private MessageAction(String messageText, List<Attachment> attachments) {
+    private SendMessageAction(String messageText, List<Attachment> attachments) {
         this.messageText = messageText;
         this.attachments = attachments;
     }
 
     @Override
     public ActionType type() {
-        return ActionType.MESSAGE;
+        return ActionType.SEND_MESSAGE;
     }
 
     @Override
@@ -64,8 +64,8 @@ public class MessageAction implements Action {
             return this;
         }
 
-        public MessageAction build() {
-            return new MessageAction(this.messageText, this.attachments);
+        public SendMessageAction build() {
+            return new SendMessageAction(this.messageText, this.attachments);
         }
     }
 }

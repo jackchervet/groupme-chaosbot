@@ -6,6 +6,7 @@ import java.util.List;
 public class Attachment {
     private String type;
     private String url;
+    private String preview_url;
     private List<List<Integer>> loci;
     private List<String> user_ids;
 
@@ -31,6 +32,10 @@ public class Attachment {
 
     public String getUrl() {
         return this.url;
+    }
+
+    public String getPreviewUrl() {
+        return this.preview_url;
     }
 
     public static Builder newBuilder() {

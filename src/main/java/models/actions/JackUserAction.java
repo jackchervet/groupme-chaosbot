@@ -32,11 +32,11 @@ public class JackUserAction implements UserAction {
 
         if (text.startsWith("/peppers")) {
             if (FLAGS.peppersOn()) {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("Okay, I'll lay off. Behave now Geppo...")
                     .build());
             } else {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("Classic. I'll handle this.")
                     .build());
             }
@@ -46,11 +46,11 @@ public class JackUserAction implements UserAction {
 
         if (text.startsWith("/tomdelonge")) {
             if (FLAGS.tomDelongeOn()) {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("Okay, I'm done. Wake up sheeple.")
                     .build());
             } else {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("ALIENS")
                     .build());
             }
@@ -60,11 +60,11 @@ public class JackUserAction implements UserAction {
 
         if (text.startsWith("/pvp")) {
             if (FLAGS.duelsOn()) {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("Lay down your arms, brothers. PVP mode is OFF.")
                     .build());
             } else {
-                actionsList.add(MessageAction.newBuilder()
+                actionsList.add(SendMessageAction.newBuilder()
                     .setMessageText("Tally ho! Let the bloodshed begin. PVP mode is ON.")
                     .build());
             }
